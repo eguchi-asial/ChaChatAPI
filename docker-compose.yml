@@ -1,0 +1,13 @@
+version: "3.4"
+services:
+  api-server:
+    container_name: chachat-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/opt/app/api
+    ports:
+      - 3000:3000
+    environment:
+      API_ENV: ${API_ENV}
