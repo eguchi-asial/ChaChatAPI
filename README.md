@@ -9,7 +9,7 @@ $npm run start:dev
 
 ```
 $cd api
-$docker build -t kaedchachat-api .
+$docker build -t chachat-api .
 $docker run  -e API_ENV=dev -p 3000:3000 -d chachat-api
 ```
 
