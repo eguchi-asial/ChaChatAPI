@@ -1,6 +1,6 @@
 FROM node:14.11-stretch
 
-MAINTAINER Yu Eguchi
+LABEL maintainer="Yu Eguchi"
 
 WORKDIR /opt/app/api/
 
