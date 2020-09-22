@@ -29,13 +29,16 @@ app.get('/', (req, res) => {
 
 // ws API
 io.on('connection', (socket: Socket) => {
-  console.log('connected');
-
+  const clientIpAddress =
+    socket.request.headers['x-forwarded-for'] ||
+    socket.request.connection.remoteAddress;
+  console.log('connected', clientIpAddress);
+  /* クライアントからのメッセージ受信処理 */
   socket.on('post-message', (msg: Chat) => {
-    console.log('post-message', msg);
+    /* 受信したメッセージをルームメンバーに通知pushする */
     io.emit('receive-message', {
       ...msg,
-      postId: msg?.postId || uuidv4(),
+      postId: msg?.postId || clientIpAddress,
     });
   });
 });
