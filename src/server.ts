@@ -35,16 +35,43 @@ io.on('connection', (socket: Socket) => {
     socket.request.headers['x-forwarded-for'] ||
     socket.request.connection.remoteAddress;
   console.log('connected', clientIpAddress);
+  // ルーム入室処理
+  socket.join('test-room');
+  io.to('test-room').emit('receive-message', {
+    type: 'system',
+    name: 'システム',
+    body: `${digestMessage(clientIpAddress)}さんが入室しました`,
+    postId: 'system',
+    postedAt: moment().format('YYYY-MM-DD h:m:s'),
+  });
+  const { length: roomLength } = io.sockets.adapter.rooms['test-room'];
+  io.to('test-room').emit('room-length', roomLength);
+
   /* クライアントからのメッセージ受信処理 */
   socket.on('post-message', async (msg: Chat) => {
     /* 受信したメッセージをルームメンバーに通知pushする */
-    io.emit('receive-message', {
+    io.to('test-room').emit('receive-message', {
       ...msg,
-      postId: msg?.postId || (await digestMessage(clientIpAddress)),
+      type: 'chat',
+      postId: msg?.postId || digestMessage(clientIpAddress),
     });
+  });
+  /* disconnecting */
+  socket.on('disconnecting', () => {
+    const { length: roomLength } = io.sockets.adapter.rooms['test-room'];
+    // leaveしてからじゃないとlengthはわからないが、leaveするとadapter.roomsはundefinedになるのでここで-1
+    io.to('test-room').emit('room-length', roomLength - 1);
   });
   /* disconnected */
   socket.on('disconnect', (reason: string) => {
+    socket.leave('test-room');
+    io.to('test-room').emit('receive-message', {
+      type: 'system',
+      name: 'システム',
+      body: `${digestMessage(clientIpAddress)}さんが退室しました`,
+      postId: 'system',
+      postedAt: moment().format('YYYY-MM-DD h:m:s'),
+    });
     console.log(`disconnect: ${reason}`);
   });
 });
@@ -59,7 +86,7 @@ server.listen(PORT, () => {
  * https://developer.mozilla.org/ja/docs/Web/API/SubtleCrypto/digest
  * @param message string ハッシュ化したい文字列
  */
-async function digestMessage(message: string) {
+function digestMessage(message: string) {
   return MD5(`${message}-${moment().format('YYYY-MM-DD')}`).toString(
     enc.Base64
   );
