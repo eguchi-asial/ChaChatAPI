@@ -1,4 +1,4 @@
-FROM node:14.11-stretch
+FROM node:12.18-stretch
 
 LABEL maintainer="Yu Eguchi"
 

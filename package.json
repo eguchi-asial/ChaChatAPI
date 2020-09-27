@@ -1,7 +1,6 @@
 {
   "name": "chachat-api",
   "version": "1.0.0",
-  "type": "module",
   "description": "chachat-websocket-api",
   "author": "eguchi@asial.co.jp",
   "main": "server.js",
