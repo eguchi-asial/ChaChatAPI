@@ -56,15 +56,11 @@ io.on('connection', (socket: Socket) => {
       postId: msg?.postId || digestMessage(clientIpAddress),
     });
   });
-  /* disconnecting */
-  socket.on('disconnecting', () => {
-    const { length: roomLength } = io.sockets.adapter.rooms['test-room'];
-    // leaveしてからじゃないとlengthはわからないが、leaveするとadapter.roomsはundefinedになるのでここで-1
-    io.to('test-room').emit('room-length', roomLength - 1);
-  });
   /* disconnected */
   socket.on('disconnect', (reason: string) => {
     socket.leave('test-room');
+    const roomInfo = io.sockets.adapter.rooms['test-room'];
+    io.to('test-room').emit('room-length', roomInfo?.length ?? 0);
     io.to('test-room').emit('receive-message', {
       type: 'system',
       name: 'システム',
