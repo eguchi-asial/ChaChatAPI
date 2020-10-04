@@ -16,5 +16,5 @@ COPY . /opt/app/api
 
 EXPOSE 8080
 
-# TODO ENVで切り替えできるようにする
+# ENVで切り替える(watch: package.json#scripts)
 CMD npm run start:$API_ENV
