@@ -1,0 +1,111 @@
+# ====================
+#
+# VPC
+#
+# ====================
+resource "aws_vpc" "chachat-api-vpc" {
+  cidr_block = "192.168.0.0/16"
+  tags = {
+    Name = "chachat-api-vpc"
+  }
+}
+
+# ====================
+#
+# subnet 1a
+#
+# ====================
+resource "aws_subnet" "chachat-api-subnet-1a" {
+  vpc_id = aws_vpc.chachat-api-vpc.id
+  cidr_block = "192.168.0.0/24"
+  availability_zone = "ap-northeast-1a"
+  tags = {
+    Name = "chachat-api-subnet-1a"
+  }
+}
+
+
+# ====================
+#
+# subnet 1c
+#
+# ====================
+resource "aws_subnet" "chachat-api-subnet-1c" {
+  vpc_id = aws_vpc.chachat-api-vpc.id
+  cidr_block = "192.168.1.0/24"
+  availability_zone = "ap-northeast-1c"
+  tags = {
+    Name = "chachat-api-subnet-1c"
+  }
+}
+
+# ====================
+#
+# Internet Gateway
+#
+# ====================
+resource "aws_internet_gateway" "chachat-api-internet-gateway" {
+  vpc_id = aws_vpc.chachat-api-vpc.id
+
+  tags = {
+    Name = "chachat-api-internet-gateway"
+  }
+}
+
+# ====================
+#
+# Route Table
+#
+# ====================
+resource "aws_route_table" "chachat-api-route-table" {
+  vpc_id = aws_vpc.chachat-api-vpc.id
+
+  tags = {
+    Name = "chachat-api-route-table"
+  }
+}
+
+resource "aws_route" "chachat-api-route" {
+  gateway_id             = aws_internet_gateway.chachat-api-internet-gateway.id
+  route_table_id         = aws_route_table.chachat-api-route-table.id
+  destination_cidr_block = "0.0.0.0/0"
+}
+
+resource "aws_route_table_association" "chachat-api-route-table-association" {
+  subnet_id      = aws_subnet.chachat-api-subnet-1a.id
+  route_table_id = aws_route_table.chachat-api-route-table.id
+}
+
+# ====================
+#
+# Security Group
+#
+# ====================
+resource "aws_security_group" "chachat-api-security-group" {
+  vpc_id = aws_vpc.chachat-api-vpc.id
+  name   = "chachat-api-security-group"
+
+  tags = {
+    Name = "chachat-api-security-group"
+  }
+}
+
+# インバウンドルール(ssh接続用)
+resource "aws_security_group_rule" "in_ssh" {
+  security_group_id = aws_security_group.chachat-api-security-group.id
+  type              = "ingress"
+  cidr_blocks       = ["0.0.0.0/0"]
+  from_port         = 22
+  to_port           = 22
+  protocol          = "tcp"
+}
+
+# アウトバウンドルール(全開放)
+resource "aws_security_group_rule" "out_all" {
+  security_group_id = aws_security_group.chachat-api-security-group.id
+  type              = "egress"
+  cidr_blocks       = ["0.0.0.0/0"]
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+}
