@@ -16,8 +16,8 @@ resource "aws_vpc" "chachat-api-vpc" {
 #
 # ====================
 resource "aws_subnet" "chachat-api-subnet-1a" {
-  vpc_id = aws_vpc.chachat-api-vpc.id
-  cidr_block = "192.168.0.0/24"
+  vpc_id            = aws_vpc.chachat-api-vpc.id
+  cidr_block        = "192.168.0.0/24"
   availability_zone = "ap-northeast-1a"
   tags = {
     Name = "chachat-api-subnet-1a"
@@ -31,8 +31,8 @@ resource "aws_subnet" "chachat-api-subnet-1a" {
 #
 # ====================
 resource "aws_subnet" "chachat-api-subnet-1c" {
-  vpc_id = aws_vpc.chachat-api-vpc.id
-  cidr_block = "192.168.1.0/24"
+  vpc_id            = aws_vpc.chachat-api-vpc.id
+  cidr_block        = "192.168.1.0/24"
   availability_zone = "ap-northeast-1c"
   tags = {
     Name = "chachat-api-subnet-1c"
@@ -76,33 +76,82 @@ resource "aws_route_table_association" "chachat-api-route-table-association" {
   route_table_id = aws_route_table.chachat-api-route-table.id
 }
 
+resource "aws_route_table_association" "chachat-api-route-table-association-a" {
+  subnet_id      = aws_subnet.chachat-api-subnet-1a.id
+  route_table_id = aws_route_table.chachat-api-route-table.id
+}
+
+resource "aws_route_table_association" "chachat-api-route-table-association-c" {
+  subnet_id      = aws_subnet.chachat-api-subnet-1c.id
+  route_table_id = aws_route_table.chachat-api-route-table.id
+}
+
 # ====================
 #
 # Security Group
 #
 # ====================
-resource "aws_security_group" "chachat-api-security-group" {
+resource "aws_security_group" "chachat-api-web-security-group" {
   vpc_id = aws_vpc.chachat-api-vpc.id
-  name   = "chachat-api-security-group"
+  name   = "chachat-api-web-security-group"
 
   tags = {
-    Name = "chachat-api-security-group"
+    Name = "chachat-api-web-security-group"
   }
 }
 
-# インバウンドルール(ssh接続用)
-resource "aws_security_group_rule" "in_ssh" {
-  security_group_id = aws_security_group.chachat-api-security-group.id
+# web: インバウンドルール(web)
+resource "aws_security_group_rule" "chchat-api-web-rule-in" {
+  security_group_id = aws_security_group.chachat-api-web-security-group.id
   type              = "ingress"
   cidr_blocks       = ["0.0.0.0/0"]
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+}
+# web-ssh 踏み出しからのsshのみを許可
+resource "aws_security_group_rule" "chchat-api-web-ssh-rule-in" {
+  security_group_id        = aws_security_group.chachat-api-web-security-group.id
+  type                     = "ingress"
+  source_security_group_id = aws_security_group.chachat-api-fumidai-security-group.id
+  from_port                = 22
+  to_port                  = 22
+  protocol                 = "tcp"
+}
+
+# web: アウトバウンドルール(全開放)
+resource "aws_security_group_rule" "chchat-api-web-rule-out" {
+  security_group_id = aws_security_group.chachat-api-web-security-group.id
+  type              = "egress"
+  cidr_blocks       = ["0.0.0.0/0"]
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+}
+
+# 踏み台
+resource "aws_security_group" "chachat-api-fumidai-security-group" {
+  vpc_id = aws_vpc.chachat-api-vpc.id
+  name   = "chachat-api-fumidai-security-group"
+
+  tags = {
+    Name = "chachat-api-fumidai-security-group"
+  }
+}
+
+# 踏み台: インバウンドルール(ssh)
+resource "aws_security_group_rule" "chchat-api-fumidai-rule-in" {
+  security_group_id = aws_security_group.chachat-api-fumidai-security-group.id
+  type              = "ingress"
   from_port         = 22
   to_port           = 22
+  cidr_blocks       = ["222.224.169.129/32"]
   protocol          = "tcp"
 }
 
-# アウトバウンドルール(全開放)
-resource "aws_security_group_rule" "out_all" {
-  security_group_id = aws_security_group.chachat-api-security-group.id
+# 踏み台: アウトバウンドルール(全開放)
+resource "aws_security_group_rule" "chchat-api-fumidai-rule-out" {
+  security_group_id = aws_security_group.chachat-api-fumidai-security-group.id
   type              = "egress"
   cidr_blocks       = ["0.0.0.0/0"]
   from_port         = 0
