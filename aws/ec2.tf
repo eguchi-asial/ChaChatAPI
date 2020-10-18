@@ -5,10 +5,25 @@ resource "aws_instance" "chachat-api-web-ec2" {
   ami                         = "ami-0ce107ae7af2e92b5"
   vpc_security_group_ids      = [aws_security_group.chachat-api-web-security-group.id]
   subnet_id                   = aws_subnet.chachat-api-subnet-1a.id
+  key_name                    = aws_key_pair.public-key.key_name
   associate_public_ip_address = "true"
   tags = {
     Name = "chachat-api-web"
   }
+}
+
+# Elastic IP
+## https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eip
+resource "aws_eip" "chachat-api-web-elastic-ip" {
+  instance   = aws_instance.chachat-api-web-ec2[0].id
+  vpc        = true
+  depends_on = [aws_internet_gateway.chachat-api-internet-gateway]
+}
+
+resource "aws_eip" "chachat-api-fumidai-elastic-ip" {
+  instance   = aws_instance.chachat-api-fumidai-ec2[0].id
+  vpc        = true
+  depends_on = [aws_internet_gateway.chachat-api-internet-gateway]
 }
 
 # 踏み台ec2 固定IP帯からのみSSH可能

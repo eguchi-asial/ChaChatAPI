@@ -26,3 +26,12 @@ https://docs.docker.jp/compose/environment-variables.html#env
 $cd pj's root
 $docker-compose up -d
 ```
+
+- terraform
+
+  - terraform plan
+  - terraform apply
+
+- ssh
+  - ssh-add
+    - ssh ec2-user@output された fumidai-ip
