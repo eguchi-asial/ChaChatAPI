@@ -32,6 +32,6 @@ $docker-compose up -d
   - terraform plan
   - terraform apply
 
-- ssh
-  - ssh-add
-    - ssh ec2-user@output された fumidai-ip
+- ssh (鍵認証を引き継いで踏み台から web サーバに ssh する必要がある = AgentForward)
+  - ssh -A ec2-user@fumidai の public ipaddress
+  - ssh ec2-user@web サーバの private ipaddress
