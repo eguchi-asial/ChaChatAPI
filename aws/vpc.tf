@@ -91,6 +91,16 @@ resource "aws_route_table_association" "chachat-api-route-table-association-c" {
 # Security Group
 #
 # ====================
+# ALB
+resource "aws_security_group" "chachat-api-alb-security-group" {
+  vpc_id = aws_vpc.chachat-api-vpc.id
+  name   = "chachat-api-alb-security-group"
+
+  tags = {
+    Name = "chachat-api-alb-security-group"
+  }
+}
+# web
 resource "aws_security_group" "chachat-api-web-security-group" {
   vpc_id = aws_vpc.chachat-api-vpc.id
   name   = "chachat-api-web-security-group"
@@ -100,22 +110,41 @@ resource "aws_security_group" "chachat-api-web-security-group" {
   }
 }
 
-# web: インバウンドルール(web) apiは3000だが、websocketでpollingに80が使われるため80と3000が必要
-resource "aws_security_group_rule" "chchat-api-web-rule-in" {
-  security_group_id = aws_security_group.chachat-api-web-security-group.id
+# ALB インバウンドルール 443
+resource "aws_security_group_rule" "chchat-api-alb-rule-in" {
+  security_group_id = aws_security_group.chachat-api-alb-security-group.id
   type              = "ingress"
   cidr_blocks       = ["0.0.0.0/0"]
-  from_port         = 80
-  to_port           = 80
+  from_port         = 443
+  to_port           = 443
   protocol          = "tcp"
 }
-resource "aws_security_group_rule" "chchat-api-api-rule-in" {
-  security_group_id = aws_security_group.chachat-api-web-security-group.id
-  type              = "ingress"
+# ALB アウトバウンドルール(全開放)
+resource "aws_security_group_rule" "chchat-api-api-rule-out" {
+  security_group_id = aws_security_group.chachat-api-alb-security-group.id
+  type              = "egress"
   cidr_blocks       = ["0.0.0.0/0"]
-  from_port         = 3000
-  to_port           = 3000
-  protocol          = "tcp"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+}
+
+# web: インバウンドルール(web) apiは3000だが、websocketでpollingに80が使われるため80と3000が必要
+resource "aws_security_group_rule" "chchat-api-web-rule-in" {
+  security_group_id        = aws_security_group.chachat-api-web-security-group.id
+  type                     = "ingress"
+  source_security_group_id = aws_security_group.chachat-api-alb-security-group.id
+  from_port                = 80
+  to_port                  = 80
+  protocol                 = "tcp"
+}
+resource "aws_security_group_rule" "chchat-api-api-rule-in" {
+  security_group_id        = aws_security_group.chachat-api-web-security-group.id
+  type                     = "ingress"
+  source_security_group_id = aws_security_group.chachat-api-alb-security-group.id
+  from_port                = 3000
+  to_port                  = 3000
+  protocol                 = "tcp"
 }
 # web-ssh 踏み出しからのsshのみを許可
 resource "aws_security_group_rule" "chchat-api-web-ssh-rule-in" {
