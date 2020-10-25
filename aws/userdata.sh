@@ -1,22 +1,26 @@
+#!/bin/bash
 # yum
-sudo yum update -y
+yum update -y
 # npm (npxとnodeが欲しいので)
+## TODO うまくいかない nvmが入らない。sshしてから手動だと入る
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
 . ~/.nvm/nvm.sh
 nvm install node
 node -e "console.log('Running Node.js ' + process.version)"
-
+# change workspace
+cd /var
+mkdir www
+cd www
 # docker
-sudo yum install -y docker
-sudo service docker start
-sudo usermod -aG docker $USER
-sudo docker info
-sudo curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
+yum install -y docker
+service docker start
+usermod -aG docker $USER
+docker info
+curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
 docker-compose --version
-
 # git
-sudo yum install -y git
+yum install -y git
 git --version
 git clone https://github.com/eguchi-asial/ChaChatAPI.git
 cd ChaChatAPI

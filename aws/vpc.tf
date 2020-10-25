@@ -109,6 +109,14 @@ resource "aws_security_group_rule" "chchat-api-web-rule-in" {
   to_port           = 80
   protocol          = "tcp"
 }
+resource "aws_security_group_rule" "chchat-api-api-rule-in" {
+  security_group_id = aws_security_group.chachat-api-web-security-group.id
+  type              = "ingress"
+  cidr_blocks       = ["0.0.0.0/0"]
+  from_port         = 3000
+  to_port           = 3000
+  protocol          = "tcp"
+}
 # web-ssh 踏み出しからのsshのみを許可
 resource "aws_security_group_rule" "chchat-api-web-ssh-rule-in" {
   security_group_id        = aws_security_group.chachat-api-web-security-group.id

@@ -9,11 +9,6 @@ import { MD5, enc } from 'crypto-js';
 import moment from 'moment';
 
 const app: express.Express = express();
-const server: http.Server = http.createServer(app);
-const io: socketio.Server = socketio(server);
-
-const PORT = process.env.PORT || 3000;
-
 // CORSの許可
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
@@ -23,6 +18,10 @@ app.use((req, res, next) => {
   );
   next();
 });
+const server: http.Server = http.createServer(app);
+const io: socketio.Server = socketio(server);
+
+const PORT = process.env.PORT || 3000;
 
 // http API
 app.get('/', (req, res) => {
