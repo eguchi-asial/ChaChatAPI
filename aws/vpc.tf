@@ -100,7 +100,7 @@ resource "aws_security_group" "chachat-api-web-security-group" {
   }
 }
 
-# web: インバウンドルール(web)
+# web: インバウンドルール(web) apiは3000だが、websocketでpollingに80が使われるため80と3000が必要
 resource "aws_security_group_rule" "chchat-api-web-rule-in" {
   security_group_id = aws_security_group.chachat-api-web-security-group.id
   type              = "ingress"

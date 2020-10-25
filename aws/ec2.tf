@@ -9,14 +9,9 @@ resource "aws_instance" "chachat-api-web-ec2" {
   associate_public_ip_address = "true"
   user_data                   = <<USERDATA
 #!/bin/bash
+# user_dataはrootで動くので注意
 # yum
 yum update -y
-# npm (npxとnodeが欲しいので)
-## TODO うまくいかない nvmが入らない。sshしてから手動だと入る
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
-. ~/.nvm/nvm.sh
-nvm install node
-node -e "console.log('Running Node.js ' + process.version)"
 # change workspace
 cd /var
 mkdir www
@@ -34,6 +29,13 @@ yum install -y git
 git --version
 git clone https://github.com/eguchi-asial/ChaChatAPI.git
 cd ChaChatAPI
+# npm (npxとnodeが欲しいので)
+## TODO うまくいかない nvmが入らない。sshしてから手動だと入る
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
+. ~/.nvm/nvm.sh
+nvm install node
+node -e "console.log('Running Node.js ' + process.version)"
+# TODO nvmがuserdata経由時に評価れず、installされないので、nodeもNotFoundになる
 npm install
 echo 'API_ENV=prod' > .env
 # usermodは一旦logoutしてからloginしないと有効にならないので注意
