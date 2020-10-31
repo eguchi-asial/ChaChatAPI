@@ -35,8 +35,11 @@ resource "aws_lb_target_group_attachment" "chachat-api-alb-target-group-attachme
 # ALBのリスナー
 resource "aws_lb_listener" "chachat-api-alb-listener" {
   load_balancer_arn = aws_lb.chachat-api-alb.arn
-  port              = "3000"
-  protocol          = "HTTP"
+  port              = "443"
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2015-05"
+  # 各自が事前にACMに登録しておいた証明書のarnを指定する
+  certificate_arn = "arn:aws:acm:ap-northeast-1:569113468865:certificate/f71488ad-72de-498e-b182-c7f1597b0149"
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.chachat-api-alb-target-group.arn
