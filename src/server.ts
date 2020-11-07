@@ -37,10 +37,19 @@ io.on('connection', (socket: Socket) => {
   console.log('connected', clientIpAddress);
   // ルーム入室処理
   socket.join('test-room');
-  io.to('test-room').emit('receive-message', {
+  // 自分以外に周知
+  socket.broadcast.to('test-room').emit('receive-message', {
     type: 'system',
     name: 'システム',
     body: `${digestMessage(clientIpAddress)}さんが入室しました`,
+    postId: 'system',
+    postedAt: moment().format('YYYY-MM-DD h:m:s'),
+  });
+  // 自分に周知
+  io.to(socket.id).emit('receive-message', {
+    type: 'system',
+    name: 'システム',
+    body: `あなたは${digestMessage(clientIpAddress)}として入室しました`,
     postId: 'system',
     postedAt: moment().format('YYYY-MM-DD h:m:s'),
   });
@@ -49,11 +58,18 @@ io.on('connection', (socket: Socket) => {
 
   /* クライアントからのメッセージ受信処理 */
   socket.on('post-message', async (msg: Chat) => {
+    console.log(`from client: ${JSON.stringify({ ...msg, postId: digestMessage(clientIpAddress)})}`);
     /* 受信したメッセージをルームメンバーに通知pushする */
-    io.to('test-room').emit('receive-message', {
+    socket.broadcast.to('test-room').emit('receive-message', {
       ...msg,
       type: 'chat',
-      postId: msg?.postId || digestMessage(clientIpAddress),
+      postId: digestMessage(clientIpAddress),
+    });
+    // 自分にも送っておく
+    io.to(socket.id).emit('receive-message', {
+      ...msg,
+      type: 'chat',
+      postId: digestMessage(clientIpAddress),
     });
   });
   /* disconnected */
@@ -61,7 +77,8 @@ io.on('connection', (socket: Socket) => {
     socket.leave('test-room');
     const roomInfo = io.sockets.adapter.rooms['test-room'];
     io.to('test-room').emit('room-length', roomInfo?.length ?? 0);
-    io.to('test-room').emit('receive-message', {
+    // 自分以外に退室を知らせる
+    socket.broadcast.to('test-room').emit('receive-message', {
       type: 'system',
       name: 'システム',
       body: `${digestMessage(clientIpAddress)}さんが退室しました`,
