@@ -7,6 +7,7 @@ resource "aws_instance" "chachat-api-web-ec2" {
   subnet_id                   = aws_subnet.chachat-api-subnet-1a.id
   key_name                    = aws_key_pair.public-key.key_name
   associate_public_ip_address = "true"
+  iam_instance_profile        = aws_iam_instance_profile.chachat-api-web-profile.name
   user_data                   = <<USERDATA
 #!/bin/bash
 # user_dataはrootで動くので注意
@@ -24,6 +25,12 @@ docker info
 curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
 docker-compose --version
+# codedeploy
+yum install -y ruby
+yum install -y aws-cli
+aws s3 cp s3://aws-codedeploy-ap-northeast-1/latest/install . --region ap-northeast-1
+chmod +x ./install
+./install auto
 # git
 yum install -y git
 git --version

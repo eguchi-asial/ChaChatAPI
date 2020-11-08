@@ -1,0 +1,10 @@
+# codedeploy
+version: 1.0
+os: linux
+files:
+  - source: /
+    destination: /var/www/ChaChatAPI
+hooks:
+  ApplicationStart:
+    - location: /var/www/ChaChatAPI/codedeploy.sh
+      timeout: 180
