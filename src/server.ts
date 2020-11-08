@@ -9,6 +9,9 @@ import { MD5, enc } from 'crypto-js';
 import moment from 'moment';
 
 const app: express.Express = express();
+// SECURITY
+app.disable('x-powered-by')
+
 // CORSの許可
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', ['http://localhost:8080', 'https://chachat.netlify.app']);
