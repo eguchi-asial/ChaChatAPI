@@ -5,8 +5,9 @@ import http from 'http';
 import socketio, { Socket } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
 import Chat from './types/chat';
-import { MD5, enc } from 'crypto-js';
 import moment from 'moment';
+import { TYPES } from './utils/const';
+import { digestMessage } from './utils/util';
 
 const app: express.Express = express();
 // SECURITY
@@ -41,15 +42,15 @@ io.on('connection', (socket: Socket) => {
   socket.join('test-room');
   // 自分以外に周知
   socket.broadcast.to('test-room').emit('receive-message', {
-    type: 'system',
+    type: TYPES.SYSTEM,
     name: 'システム',
     body: `${digestMessage(clientIpAddress)}さんが入室しました`,
-    postId: 'system',
+    postId: TYPES.SYSTEM,
     postedAt: moment().format('YYYY-MM-DD h:m:s'),
   });
   // 自分に周知
   io.to(socket.id).emit('receive-message', {
-    type: 'system',
+    type: TYPES.SYSTEM,
     name: 'システム',
     body: `あなたは${digestMessage(clientIpAddress)}として入室しました`,
     postId: 'system',
@@ -64,13 +65,13 @@ io.on('connection', (socket: Socket) => {
     /* 受信したメッセージをルームメンバーに通知pushする */
     socket.broadcast.to('test-room').emit('receive-message', {
       ...msg,
-      type: 'chat',
+      type: TYPES.CHAT,
       postId: digestMessage(clientIpAddress),
     });
     // 自分にも送っておく
     io.to(socket.id).emit('receive-message', {
       ...msg,
-      type: 'chat',
+      type: TYPES.CHAT,
       postId: digestMessage(clientIpAddress),
     });
   });
@@ -81,10 +82,10 @@ io.on('connection', (socket: Socket) => {
     io.to('test-room').emit('room-length', roomInfo?.length ?? 0);
     // 自分以外に退室を知らせる
     socket.broadcast.to('test-room').emit('receive-message', {
-      type: 'system',
+      type: TYPES.SYSTEM,
       name: 'システム',
       body: `${digestMessage(clientIpAddress)}さんが退室しました`,
-      postId: 'system',
+      postId: TYPES.SYSTEM,
       postedAt: moment().format('YYYY-MM-DD h:m:s'),
     });
     console.log(`disconnect: ${reason}`);
@@ -94,15 +95,3 @@ io.on('connection', (socket: Socket) => {
 server.listen(PORT, () => {
   console.log('server listening. Port:' + PORT);
 });
-
-/**
- * ハッシュ関数
- * セキュリティ用途なし
- * https://developer.mozilla.org/ja/docs/Web/API/SubtleCrypto/digest
- * @param message string ハッシュ化したい文字列
- */
-function digestMessage(message: string) {
-  return MD5(`${message}-${moment().format('YYYY-MM-DD')}`).toString(
-    enc.Base64
-  );
-}
