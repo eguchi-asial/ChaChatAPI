@@ -33,5 +33,10 @@ $docker-compose up -d
   - terraform apply
 
 - ssh (鍵認証を引き継いで踏み台から web サーバに ssh する必要がある = AgentForward)
+
   - ssh -A ec2-user@fumidai の public ipaddress
   - ssh ec2-user@web サーバの private ipaddress
+
+- deploy について
+  - github に master ブランチを push すると actions が起動し、aws codedeploy に自動で deploy してくれます
+    - codedeploy は appspec.yml を参照のこと
