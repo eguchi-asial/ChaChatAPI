@@ -5,6 +5,9 @@ files:
   - source: /
     destination: /var/www/ChaChatAPI
 hooks:
+  BeforeInstall:
+    - location: ./codeclean.sh
+      timeout: 180  
   AfterInstall:
     - location: ./codedeploy.sh
       timeout: 180  
