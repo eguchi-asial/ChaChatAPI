@@ -5,6 +5,6 @@ files:
   - source: /
     destination: /var/www/ChaChatAPI
 hooks:
-  ApplicationStart:
+  AfterInstall:
     - location: /var/www/ChaChatAPI/codedeploy.sh
       timeout: 180
