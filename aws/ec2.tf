@@ -43,6 +43,10 @@ curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.32.1/install.sh | b
 nvm install node
 node -e "console.log('Running Node.js ' + process.version)"
 npm install
+export NVM_DIR="/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
 echo 'API_ENV=prod' > .env
 # usermodは一旦logoutしてからloginしないと有効にならないので注意
 docker-compose up -d
