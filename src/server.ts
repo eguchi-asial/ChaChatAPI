@@ -14,8 +14,9 @@ const app: express.Express = express();
 app.disable('x-powered-by')
 
 // CORSの許可
+const origins = ['http://localhost:8080', 'https://chachat.netlify.app']
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', ['http://localhost:8080', 'https://chachat.netlify.app']);
+  res.header('Access-Control-Allow-Origin', origins);
   res.header(
     'Access-Control-Allow-Headers',
     'Origin, X-Requested-With, Content-Type, Accept'
@@ -23,7 +24,11 @@ app.use((req, res, next) => {
   next();
 });
 const server: http.Server = http.createServer(app);
-const io: socketio.Server = socketio(server);
+// https://socket.io/docs/v2/server-api/
+const io: socketio.Server = socketio(server, {
+  origins,
+  cookie: false
+});
 
 const PORT = process.env.PORT || 3000;
 
@@ -65,13 +70,11 @@ io.on('connection', (socket: Socket) => {
     /* 受信したメッセージをルームメンバーに通知pushする */
     socket.broadcast.to('test-room').emit('receive-message', {
       ...msg,
-      type: TYPES.CHAT,
       postId: digestMessage(clientIpAddress),
     });
     // 自分にも送っておく
     io.to(socket.id).emit('receive-message', {
       ...msg,
-      type: TYPES.CHAT,
       postId: digestMessage(clientIpAddress),
     });
   });
