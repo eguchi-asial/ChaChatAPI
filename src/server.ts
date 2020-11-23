@@ -24,11 +24,7 @@ app.use((req, res, next) => {
   next();
 });
 const server: http.Server = http.createServer(app);
-// https://socket.io/docs/v2/server-api/
-const io: socketio.Server = socketio(server, {
-  origins,
-  cookie: false
-});
+const io: socketio.Server = socketio(server);
 
 const PORT = process.env.PORT || 3000;
 
