@@ -35,14 +35,15 @@ app.get('/', (req, res) => {
 
 // ws API
 io.on('connection', (socket: Socket) => {
+  console.log('room name: ', socket.handshake.query?.room);
   const clientIpAddress =
     socket.request.headers['x-forwarded-for'] ||
     socket.request.connection.remoteAddress;
   console.log('connected', clientIpAddress);
   // ルーム入室処理
-  socket.join('test-room');
+  socket.join(socket.handshake.query?.room);
   // 自分以外に周知
-  socket.broadcast.to('test-room').emit('receive-message', {
+  socket.broadcast.to(socket.handshake.query?.room).emit('receive-message', {
     type: TYPES.SYSTEM,
     name: 'システム',
     body: `${digestMessage(clientIpAddress)}さんが入室しました`,
@@ -57,14 +58,14 @@ io.on('connection', (socket: Socket) => {
     postId: 'system',
     postedAt: moment().format('YYYY-MM-DD h:m:s'),
   });
-  const { length: roomLength } = io.sockets.adapter.rooms['test-room'];
-  io.to('test-room').emit('room-length', roomLength);
+  const { length: roomLength } = io.sockets.adapter.rooms[socket.handshake.query?.room];
+  io.to(socket.handshake.query?.room).emit('room-length', roomLength);
 
   /* クライアントからのメッセージ受信処理 */
   socket.on('post-message', async (msg: Chat) => {
     console.log(`from client: ${JSON.stringify({ ...msg, postId: digestMessage(clientIpAddress)})}`);
     /* 受信したメッセージをルームメンバーに通知pushする */
-    socket.broadcast.to('test-room').emit('receive-message', {
+    socket.broadcast.to(socket.handshake.query?.room).emit('receive-message', {
       ...msg,
       postId: digestMessage(clientIpAddress),
     });
@@ -76,11 +77,11 @@ io.on('connection', (socket: Socket) => {
   });
   /* disconnected */
   socket.on('disconnect', (reason: string) => {
-    socket.leave('test-room');
-    const roomInfo = io.sockets.adapter.rooms['test-room'];
-    io.to('test-room').emit('room-length', roomInfo?.length ?? 0);
+    socket.leave(socket.handshake.query?.room);
+    const roomInfo = io.sockets.adapter.rooms[socket.handshake.query?.room];
+    io.to(socket.handshake.query?.room).emit('room-length', roomInfo?.length ?? 0);
     // 自分以外に退室を知らせる
-    socket.broadcast.to('test-room').emit('receive-message', {
+    socket.broadcast.to(socket.handshake.query?.room).emit('receive-message', {
       type: TYPES.SYSTEM,
       name: 'システム',
       body: `${digestMessage(clientIpAddress)}さんが退室しました`,
