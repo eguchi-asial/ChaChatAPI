@@ -35,13 +35,36 @@ app.get('/', (req, res) => {
 
 // ws API
 io.on('connection', (socket: Socket) => {
-  console.log('room name: ', socket.handshake.query?.room);
   const clientIpAddress =
     socket.request.headers['x-forwarded-for'] ||
     socket.request.connection.remoteAddress;
   console.log('connected', clientIpAddress);
+  // 検索処理
+  console.log('room search?: ', socket.handshake.query?.searchFlg ? 'Yes' : 'No');
+  console.log('room searchStr: ', socket.handshake.query?.searchStr);
+  if (socket.handshake.query?.searchFlg) {
+    // io.sockets.adapter.roomsの中から、Chachatシステム上で作られたroomのみを取得する
+    const availableRooms:string[] = [];
+    const rooms = io.sockets.adapter.rooms;
+    for (const room in rooms) {
+      // 部屋名がsocketsのkeyに含まれていないroomが作成した部屋になる
+      if (!Object.keys(rooms[room].sockets).includes(room)) {
+        availableRooms.push(room);
+      }
+    }
+    io.to(socket.id).emit('receive-message', {
+      type: 'system',
+      body: availableRooms,
+      postId: null
+    });
+    socket.on('disconnect', (reason: string) => {
+      console.log('search disconnected:', reason);
+    });
+    return;
+  }
   // ルーム入室処理
   socket.join(socket.handshake.query?.room);
+  console.log('room name: ', socket.handshake.query?.room);
   // 自分以外に周知
   socket.broadcast.to(socket.handshake.query?.room).emit('receive-message', {
     type: TYPES.SYSTEM,
