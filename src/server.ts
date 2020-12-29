@@ -8,6 +8,7 @@ import Chat from './types/chat';
 import moment from 'moment';
 import { TYPES } from './utils/const';
 import { digestMessage } from './utils/util';
+import Parser from 'rss-parser';
 
 const app: express.Express = express();
 // SECURITY
@@ -32,6 +33,11 @@ const PORT = process.env.PORT || 3000;
 app.get('/', (req, res) => {
   res.send(uuidv4());
 });
+
+app.get('/news', async (req, res) => {
+  const feed = await new Parser().parseURL('https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja');
+  res.send(feed);
+})
 
 // ws API
 io.on('connection', (socket: Socket) => {
