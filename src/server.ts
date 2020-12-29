@@ -15,9 +15,9 @@ const app: express.Express = express();
 app.disable('x-powered-by')
 
 // CORSの許可
-const origins = ['http://localhost:8080', 'https://chachat.netlify.app']
+const origin = 'https://chachat.netlify.app';
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', origins);
+  res.header('Access-Control-Allow-Origin', req.hostname === 'localhost' ? '*' : origin);
   res.header(
     'Access-Control-Allow-Headers',
     'Origin, X-Requested-With, Content-Type, Accept'
@@ -34,7 +34,7 @@ app.get('/', (req, res) => {
   res.send(uuidv4());
 });
 
-app.get('/news', async (req, res) => {
+app.get('/news-feed', async (req, res) => {
   const feed = await new Parser().parseURL('https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja');
   res.send(feed);
 })
