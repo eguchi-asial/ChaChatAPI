@@ -9,7 +9,7 @@ WORKDIR /opt/app/api/
 # 可能であれば (npm@5+)
 COPY package*.json ./
 
-RUN npm install --no-optional
+RUN npm install
 # 本番用にコードを作成している場合
 # RUN npm install --only=production
 COPY . /opt/app/api
