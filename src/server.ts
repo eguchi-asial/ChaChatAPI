@@ -39,6 +39,26 @@ app.get('/news-feed', async (req, res) => {
   res.send(feed);
 })
 
+app.get('/hatena-tech-feed', async (req, res) => {
+  const feed = await new Parser().parseURL('https://developer.hatenastaff.com/rss');
+  res.send(feed);
+})
+
+app.get('/classmethod-tech-feed', async (req, res) => {
+  const feed = await new Parser().parseURL('https://dev.classmethod.jp/feed');
+  res.send(feed);
+})
+
+app.get('/itmedia-feed', async (req, res) => {
+  const feed = await new Parser().parseURL('https://rss.itmedia.co.jp/rss/2.0/news_bursts.xml#_ga=2.195895146.753925528.1609642173-313186526.1609642173');
+  res.send(feed);
+})
+
+app.get('/webcreatorbox-feed', async (req, res) => {
+  const feed = await new Parser().parseURL('https://www.webcreatorbox.com/feed');
+  res.send(feed);
+})
+
 // ws API
 io.on('connection', (socket: Socket) => {
   const clientIpAddress =
