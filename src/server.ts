@@ -59,6 +59,11 @@ app.get('/webcreatorbox-feed', async (req, res) => {
   res.send(feed);
 })
 
+app.get('/zenn-feed', async (req, res) => {
+  const feed = await new Parser().parseURL('https://zenn.dev/feed');
+  res.send(feed);
+})
+
 // ws API
 io.on('connection', (socket: Socket) => {
   const clientIpAddress =
