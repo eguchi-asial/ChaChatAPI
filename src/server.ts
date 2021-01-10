@@ -1,6 +1,7 @@
 'use strict';
 
 import express from 'express';
+import compression from 'compression';
 import http from 'http';
 import socketio, { Socket } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
@@ -13,6 +14,9 @@ import Parser from 'rss-parser';
 const app: express.Express = express();
 // SECURITY
 app.disable('x-powered-by')
+
+// 圧縮
+app.use(compression());
 
 // CORSの許可
 const origin = 'https://chachat.netlify.app';
