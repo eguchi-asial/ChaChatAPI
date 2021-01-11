@@ -40,3 +40,11 @@ $docker-compose up -d
 - deploy について
   - github に master ブランチを push すると actions が起動し、aws codedeploy に自動で deploy してくれます
     - codedeploy は appspec.yml を参照のこと
+
+- 監視について
+
+プロメテウス(https://prometheus.io/docs/prometheus/latest/getting_started/)を使ってます。
+
+```
+docker run -p 9090:9090 -v /path/to/your/ChaChatAPI/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus
+```
